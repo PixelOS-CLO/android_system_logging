@@ -16,23 +16,20 @@
 
 #pragma once
 
-#include <ranges>
 #include <string>
-#include <string_view>
 
 #include <log/logprint.h>
 
-using std::operator""sv;
+#include <android-base/strings.h>
 
 /**
  * filterString: a comma/whitespace-separated set of filter expressions
  *
  * eg "AT:d *:i"
  */
-static bool addFilterString(AndroidLogFormat* format, const std::string& filter_str) {
-  for (const auto& range : std::views::split(filter_str, " \t,"sv)) {
-    std::string expr(range.begin(), range.end());
-    if (android_log_addFilterRule(format, expr.c_str()) < 0) return false;
+static bool addFilterString(AndroidLogFormat* format, const std::string& filters) {
+  for (const auto& filter : android::base::Split(filters, " \t,")) {
+    if (!filter.empty() && android_log_addFilterRule(format, filter.c_str()) < 0) return false;
   }
   return true;
 }
